@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edificio paramétrico</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    padding: 22px;
+    background: #f2f2f2;
+    color: #171717;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+  h1 { margin: 4px 0; font-size: 24px; text-align: center; }
+  .controles {
+    width: min(620px, 100%);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    background: white;
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px #00000012;
+  }
+  .control { display: flex; flex-direction: column; gap: 8px; }
+  .control label { font-weight: bold; font-size: 14px; }
+  .control output { color: #0075E1; font-weight: bold; }
+  input[type="range"] { width: 100%; accent-color: #0075E1; }
+  button {
+    grid-column: 1 / -1;
+    justify-self: center;
+    padding: 10px 18px;
+    border: 0;
+    border-radius: 8px;
+    background: #0B0F19;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  button:hover { background: #0075E1; }
+  .marco {
+    width: min(1000px, 96vw);
+    height: min(65vh, 620px);
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: #990000;
+    border-radius: 12px;
+  }
+  .dibujo {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  @media (max-width: 560px) {
+    .controles { grid-template-columns: 1fr; }
+    button { grid-column: 1; }
+    .marco { height: 55vh; }
+  }
+</style>
+</head>
+<body>
+  <h1>Edificio paramétrico</h1>
+
+  <section class="controles">
+    <div class="control">
+      <label for="ancho">Parámetro 1: Ancho — <output id="valorAncho">100%</output></label>
+      <input id="ancho" type="range" min="70" max="130" value="100" step="1">
+    </div>
+    <div class="control">
+      <label for="alto">Parámetro 2: Alto — <output id="valorAlto">100%</output></label>
+      <input id="alto" type="range" min="70" max="130" value="100" step="1">
+    </div>
+    <button type="button" id="reiniciar">Restablecer medidas</button>
+  </section>
+
+  <div class="marco">
+    <!-- El SVG original está integrado aquí; no se necesita otro archivo. -->
+    <div id="contenedorSvg" style="width:100%;height:100%;">
+      <!-- Creator: CorelDRAW 2018 (64 Bit Versión de evaluación) -->
+<svg preserveAspectRatio="xMidYMid meet" id="edificio" class="dibujo"  xmlns="http://www.w3.org/2000/svg" xml:space="preserve" version="1.1" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" image-rendering="optimizeQuality" fill-rule="evenodd" clip-rule="evenodd"
+viewBox="0 0 32000 20000"
+ xmlns:xlink="http://www.w3.org/1999/xlink">
+ <g id="Capa_x0020_1">
+  <metadata id="CorelCorpID_0Corel-Layer"/>
+  <rect fill="#990000" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" x="43.14" y="35.41" width="32004.76" height="16791.57"/>
+  <rect fill="#E6E6E6" stroke="black" stroke-width="100" stroke-miterlimit="22.9256" x="569.81" y="2113.59" width="30930.67" height="14713.4"/>
+  <rect fill="#E6E6E6" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" x="298.45" y="2113.59" width="31473.37" height="3401.78"/>
+  <rect fill="none" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" x="11392.08" y="5515.37" width="9286.15" height="11311.62"/>
+  <rect fill="gray" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" x="298.46" y="9233.16" width="10774.77" height="2937.68"/>
+  <rect fill="#999999" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" x="5526.41" y="2113.59" width="637.69" height="3401.78"/>
+  <rect fill="#999999" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" x="25906.19" y="2113.59" width="637.69" height="3401.78"/>
+  <rect fill="#999999" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" x="11073.22" y="2113.59" width="637.69" height="3401.78"/>
+  <rect fill="#999999" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" x="20359.38" y="2113.59" width="637.69" height="3401.78"/>
+  <rect fill="gray" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" x="11073.22" y="5515.37" width="637.69" height="11311.62"/>
+  <rect fill="gray" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" x="20359.38" y="5515.37" width="637.69" height="11311.62"/>
+  <rect fill="gray" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" x="20997.07" y="9233.2" width="10774.76" height="2884.72"/>
+  <rect fill="#99CCCC" stroke="black" stroke-width="75" stroke-miterlimit="22.9256" x="907.95" y="12891.95" width="4305.3" height="1722.43"/>
+  <rect fill="#99CCCC" stroke="black" stroke-width="75" stroke-miterlimit="22.9256" x="6473.37" y="12890.62" width="4305.29" height="1710.53"/>
+  <rect fill="#99CCCC" stroke="black" stroke-width="75" stroke-miterlimit="22.9256" x="21316.8" y="12703.35" width="4305.3" height="1722.43"/>
+  <rect fill="#99CCCC" stroke="black" stroke-width="75" stroke-miterlimit="22.9256" x="26878.39" y="12728.12" width="4305.29" height="1710.53"/>
+  <rect fill="#99CCCC" stroke="black" stroke-width="75" stroke-miterlimit="22.9256" x="909.28" y="5947.95" width="4305.3" height="1722.43"/>
+  <rect fill="#99CCCC" stroke="black" stroke-width="75" stroke-miterlimit="22.9256" x="6472.36" y="5954.76" width="4305.29" height="1710.53"/>
+  <rect fill="#99CCCC" stroke="black" stroke-width="75" stroke-miterlimit="22.9256" x="21290.37" y="6020.55" width="4305.3" height="1722.43"/>
+  <rect fill="#99CCCC" stroke="black" stroke-width="75" stroke-miterlimit="22.9256" x="26873.08" y="6013.27" width="4305.29" height="1710.53"/>
+  <rect fill="#333333" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" x="14566.97" y="5515.38" width="1468.18" height="6601.24"/>
+  <rect fill="#333333" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" x="17503.33" y="5515.38" width="1468.18" height="6601.24"/>
+  <rect fill="#333333" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" x="18971.51" y="5515.38" width="1387.87" height="6601.24"/>
+  <rect fill="#333333" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" x="13098.79" y="5515.38" width="1468.18" height="6601.24"/>
+  <rect fill="#333333" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" x="11710.92" y="5515.38" width="1387.87" height="6601.24"/>
+  <rect fill="#1A1A1A" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" x="11710.92" y="12116.61" width="2552.83" height="4131.05"/>
+  <rect fill="#1A1A1A" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" x="17829.01" y="12116.61" width="2530.37" height="4131.05"/>
+  <rect fill="#333333" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" x="16035.15" y="5515.38" width="1468.18" height="6601.24"/>
+  <rect fill="#444445" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" x="22.39" y="16826.99" width="32025.51" height="2950.2"/>
+  <rect fill="#4D4D4D" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" x="11710.92" y="16247.67" width="8648.46" height="579.33"/>
+  <rect fill="#4D4D4D" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" x="11710.92" y="16537.33" width="8648.46" height="289.67"/>
+  <rect fill="#B8B809" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" x="11710.92" y="16247.66" width="8648.46" height="149.42"/>
+  <rect fill="#B8B809" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" x="11710.92" y="16537.32" width="8648.46" height="144.83"/>
+  <rect fill="#1A1A1A" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" x="14263.75" y="12116.61" width="3565.26" height="4134.35"/>
+  <rect fill="gray" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" x="5526.61" y="5515.36" width="637.5" height="3717.79"/>
+  <rect fill="gray" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" x="25906.39" y="5515.36" width="637.5" height="3717.79"/>
+  <rect fill="gray" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" x="5492.29" y="12170.83" width="637.5" height="4656.15"/>
+  <rect fill="gray" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" x="25923.51" y="12117.92" width="637.5" height="4709.07"/>
+  <polygon fill="#4D4D4D" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" points="909.28,6735.37 909.28,6882.96 2977.21,6882.96 2977.21,7670.38 3146.65,7670.38 3146.65,6882.96 5214.58,6882.96 5214.58,6735.37 3146.65,6735.37 3146.65,5947.95 2977.21,5947.95 2977.21,6735.37 "/>
+  <polygon fill="#4D4D4D" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" points="6472.36,6736.23 6472.36,6883.82 8540.29,6883.82 8540.29,7671.24 8709.73,7671.24 8709.73,6883.82 10777.66,6883.82 10777.66,6736.23 8709.73,6736.23 8709.73,5948.81 8540.29,5948.81 8540.29,6736.23 "/>
+  <polygon fill="#4D4D4D" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" points="907.95,13679.36 907.95,13826.95 2975.88,13826.95 2975.88,14614.37 3145.32,14614.37 3145.32,13826.95 5213.25,13826.95 5213.25,13679.36 3145.32,13679.36 3145.32,12891.94 2975.88,12891.94 2975.88,13679.36 "/>
+  <polygon fill="#4D4D4D" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" points="6473.37,13672.09 6473.37,13819.68 8541.3,13819.68 8541.3,14607.1 8710.74,14607.1 8710.74,13819.68 10778.67,13819.68 10778.67,13672.09 8710.74,13672.09 8710.74,12884.67 8541.3,12884.67 8541.3,13672.09 "/>
+  <polygon fill="#4D4D4D" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" points="26873.08,6794.74 26873.08,6942.33 28941.01,6942.33 28941.01,7729.75 29110.45,7729.75 29110.45,6942.33 31178.38,6942.33 31178.38,6794.74 29110.45,6794.74 29110.45,6007.32 28941.01,6007.32 28941.01,6794.74 "/>
+  <polygon fill="#4D4D4D" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" points="21290.37,6807.97 21290.37,6955.56 23358.3,6955.56 23358.3,7742.98 23527.74,7742.98 23527.74,6955.56 25595.67,6955.56 25595.67,6807.97 23527.74,6807.97 23527.74,6020.55 23358.3,6020.55 23358.3,6807.97 "/>
+  <polygon fill="#4D4D4D" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" points="26878.39,13509.59 26878.39,13657.18 28946.32,13657.18 28946.32,14444.6 29115.76,14444.6 29115.76,13657.18 31183.69,13657.18 31183.69,13509.59 29115.76,13509.59 29115.76,12722.17 28946.32,12722.17 28946.32,13509.59 "/>
+  <polygon fill="#4D4D4D" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" points="21316.8,13490.77 21316.8,13638.36 23384.73,13638.36 23384.73,14425.78 23554.17,14425.78 23554.17,13638.36 25622.1,13638.36 25622.1,13490.77 23554.17,13490.77 23554.17,12703.35 23384.73,12703.35 23384.73,13490.77 "/>
+  <polygon fill="#B5B5B5" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" points="300.24,2113.6 1022.28,1436.72 31070.48,1436.72 31755.98,2113.6 "/>
+  <polygon fill="#616060" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" points="11073.23,9233.16 298.46,9233.16 569.81,8861.62 11073.23,8861.62 "/>
+  <polygon fill="#616060" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" points="20997.07,9233.2 31771.83,9233.2 31500.48,8914.55 20997.07,8914.55 "/>
+  <polygon fill="#0A520A" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" points="30052.86,5060.71 28236.94,5060.71 28236.94,2563.38 30062.57,2563.39 30062.57,3049.82 28741.75,3049.82 28741.75,3642.24 29295.34,3642.24 29295.34,4176.4 28722.33,4176.4 28722.33,4661.99 30052.86,4661.99 "/>
+  <rect fill="#99CCCC" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" x="11902.55" y="12393.79" width="2182.6" height="3853.87"/>
+  <rect fill="#99CCCC" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" x="18073.75" y="12340.87" width="2109.2" height="3906.79"/>
+  <rect fill="#99CCCC" stroke="black" stroke-width="20" stroke-miterlimit="22.9256" x="14501.87" y="12407.01" width="3089.01" height="3843.95"/>
+ </g>
+</svg>
+    </div>
+  </div>
+
+<script>
+  const svg = document.getElementById("edificio");
+  const grupoPrincipal = svg.querySelector("#Capa_x0020_1");
+  const controlAncho = document.getElementById("ancho");
+  const controlAlto = document.getElementById("alto");
+  const valorAncho = document.getElementById("valorAncho");
+  const valorAlto = document.getElementById("valorAlto");
+
+  // Centro del viewBox original: 32000 x 20000.
+  const centroX = 16000;
+  const centroY = 10000;
+
+  function actualizarEdificio() {
+    const escalaX = Number(controlAncho.value) / 100;
+    const escalaY = Number(controlAlto.value) / 100;
+
+    valorAncho.textContent = controlAncho.value + "%";
+    valorAlto.textContent = controlAlto.value + "%";
+
+    if (grupoPrincipal) {
+      // Escala desde el centro para mantener el edificio centrado.
+      grupoPrincipal.setAttribute(
+        "transform",
+        `translate(${centroX * (1 - escalaX)} ${centroY * (1 - escalaY)}) scale(${escalaX} ${escalaY})`
+      );
+    }
+  }
+
+  controlAncho.addEventListener("input", actualizarEdificio);
+  controlAlto.addEventListener("input", actualizarEdificio);
+
+  document.getElementById("reiniciar").addEventListener("click", () => {
+    controlAncho.value = 100;
+    controlAlto.value = 100;
+    actualizarEdificio();
+  });
+
+  // Elimina el fondo rojo interno del SVG si existe: el marco HTML ya lo proporciona.
+  const fondo = svg.querySelector('#Capa_x0020_1 > rect[fill="#990000"], #Capa_x0020_1 > rect[style*="#990000"]');
+  if (fondo) fondo.remove();
+
+  actualizarEdificio();
+</script>
+</body>
+</html>
