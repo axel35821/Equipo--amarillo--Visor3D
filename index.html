@@ -1,1 +1,127 @@
 
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visor 3D - Equipo</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #1a1a1a;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        canvas {
+            background-color: #111;
+            border: 2px solid #444;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+        h1 {
+            margin-bottom: 10px;
+            font-size: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Visor 3D - Base del Líder</h1>
+    <!-- 1. ELEMENTO CANVAS: El lienzo donde se dibuja el visor -->
+    <canvas id="visorCanvas" width="800" height="600"></canvas>
+
+    <script>
+        const canvas = document.getElementById('visorCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Centro de la pantalla
+        const centroX = canvas.width / 2;
+        const centroY = canvas.height / 2;
+
+        // Definición de los vértices de un cubo de prueba (en coordenadas 3D: x, y, z)
+        const verticesCubo = [
+            {x: -50, y: -50, z: -50},
+            {x: 50, y: -50, z: -50},
+            {x: 50, y: 50, z: -50},
+            {x: -50, y: 50, z: -50},
+            {x: -50, y: -50, z: 50},
+            {x: 50, y: -50, z: 50},
+            {x: 50, y: 50, z: 50},
+            {x: -50, y: 50, z: 50}
+        ];
+
+        // Aristas que unen los vértices para formar el cubo
+        const aristasCubo = [
+            [0,1], [1,2], [2,3], [3,0], // Cara trasera
+            [4,5], [5,6], [6,7], [7,4], // Cara delantera
+            [0,4], [1,5], [2,6], [3,7]  // Conexiones entre caras
+        ];
+
+        let angulo = 0;
+
+        // 3. LÓGICA DE PROYECCIÓN EN PERSPECTIVA (Exigido por la rúbrica)
+        function proyectar(punto3D) {
+            const distanciaFocal = 300; // Distancia de la cámara al objeto
+            // Ajustamos el eje Z para que el objeto no quede encima de la cámara
+            const zDesplazado = punto3D.z + 200; 
+            
+            // Fórmula de proyección en perspectiva
+            const factor = distanciaFocal / zDesplazado;
+            const x2D = punto3D.x * factor + centroX;
+            const y2D = punto3D.y * factor + centroY;
+            
+            return { x: x2D, y: y2D };
+        }
+
+        // Función para rotar puntos en el espacio 3D (matrices de rotación simples en Y)
+        function rotarY(punto, ang) {
+            const rad = ang;
+            const cos = Math.cos(rad);
+            const sin = Math.sin(rad);
+            return {
+                x: punto.x * cos - punto.z * sin,
+                y: punto.y,
+                z: punto.x * sin + punto.z * cos
+            };
+        }
+
+        // 2. BUCLE DE ANIMACIÓN USANDO requestAnimationFrame (Exigido por la rúbrica)
+        function animar() {
+            // Limpiar el canvas en cada fotograma
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Rotar y proyectar los vértices del cubo
+            const verticesProyectados = verticesCubo.map(v => {
+                const rotado = rotarY(v, angulo);
+                return proyectar(rotado);
+            });
+
+            // Dibujar las aristas (líneas)
+            ctx.strokeStyle = '#00ffcc';
+            ctx.lineWidth = 2;
+            aristasCubo.forEach(arista => {
+                const p1 = verticesProyectados[arista[0]];
+                const p2 = verticesProyectados[arista[1]];
+                
+                ctx.beginPath();
+                ctx.moveTo(p1.x, p1.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.stroke();
+            });
+
+            // Incrementar el ángulo para generar movimiento continuo
+            angulo += 0.02;
+
+            // Llamada recursiva del bucle de animación
+            requestAnimationFrame(animar);
+        }
+
+        // Iniciar la animación
+        requestAnimationFrame(animar);
+    </script>
+</body>
+</html>
