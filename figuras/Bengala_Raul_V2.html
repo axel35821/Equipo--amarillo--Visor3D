@@ -1,0 +1,491 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Bengala paramétrica 3D</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background: #20232b;
+    color: white;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 0;
+    padding: 20px;
+}
+
+h2 {
+    margin-bottom: 20px;
+}
+
+canvas {
+    background: #303642;
+    border: 1px solid #777;
+    max-width: 100%;
+    border-radius: 8px;
+}
+
+.controles {
+    margin: 20px auto;
+    width: 320px;
+    max-width: 95%;
+    text-align: left;
+    background: #292e39;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+.control {
+    margin: 15px 0;
+}
+
+input {
+    width: 100%;
+    cursor: pointer;
+}
+
+span {
+    color: #ff7777;
+}
+
+</style>
+</head>
+
+<body>
+
+<h2>Bengala paramétrica 3D</h2>
+
+<canvas id="visor" width="800" height="480"></canvas>
+
+<div class="controles">
+
+    <div class="control">
+        <label>
+            Longitud:
+            <span id="valorL">160</span>
+        </label>
+
+        <input type="range" id="largo"
+        min="100" max="220" value="160">
+    </div>
+
+    <div class="control">
+        <label>
+            Radio:
+            <span id="valorR">20</span>
+        </label>
+
+        <input type="range" id="radio"
+        min="12" max="35" value="20">
+    </div>
+
+</div>
+
+<script>
+
+// ======================================
+// CONFIGURACIÓN
+// ======================================
+
+const canvas = document.getElementById("visor");
+const ctx = canvas.getContext("2d");
+
+const largo = document.getElementById("largo");
+const radio = document.getElementById("radio");
+
+// Geometría optimizada
+
+const segmentos = 24;
+const anillos = 20;
+
+// Centro de la figura
+
+const centroX = 400;
+const centroY = 240;
+
+// ======================================
+// PERFIL PARAMÉTRICO
+// ======================================
+
+function perfil(t) {
+
+    const puntos = [
+
+        [0.00, 0.68],
+        [0.04, 0.82],
+        [0.10, 0.96],
+        [0.16, 1.00],
+        [0.82, 1.00],
+        [0.90, 0.96],
+        [0.95, 0.78],
+        [0.98, 0.62],
+        [1.00, 0.62]
+
+    ];
+
+    for (let i = 0; i < puntos.length - 1; i++) {
+
+        const [t1, r1] = puntos[i];
+        const [t2, r2] = puntos[i + 1];
+
+        if (t >= t1 && t <= t2) {
+
+            let f = (t - t1) / (t2 - t1);
+
+            // Interpolación cúbica
+
+            f = f * f * (3 - 2 * f);
+
+            return r1 + (r2 - r1) * f;
+        }
+    }
+
+    return puntos[puntos.length - 1][1];
+}
+
+// ======================================
+// CREAR GEOMETRÍA
+// ======================================
+
+function crearBengala(L, R) {
+
+    const vertices = [];
+
+    for (let i = 0; i <= anillos; i++) {
+
+        const v = i / anillos;
+
+        for (let j = 0; j < segmentos; j++) {
+
+            const u = (j / segmentos) * Math.PI * 2;
+
+            let r = R * perfil(v);
+
+            // Relieve inferior
+
+            r += 0.8 * Math.exp(
+                -Math.pow((v - 0.06) / 0.018, 2)
+            );
+
+            // Anillo de unión
+
+            r += 0.6 * Math.exp(
+                -Math.pow((v - 0.84) / 0.012, 2)
+            );
+
+            const x = r * Math.cos(u);
+            const y = L * (v - 0.5);
+            const z = r * Math.sin(u);
+
+            vertices.push({x, y, z});
+
+        }
+    }
+
+    return vertices;
+}
+
+// ======================================
+// PROYECCIÓN 3D
+// ======================================
+
+function proyectar(p) {
+
+    const ax = -0.25;
+    const ay = 0.55;
+
+    // Rotación X
+
+    const y1 =
+        p.y * Math.cos(ax) -
+        p.z * Math.sin(ax);
+
+    const z1 =
+        p.y * Math.sin(ax) +
+        p.z * Math.cos(ax);
+
+    // Rotación Y
+
+    const x2 =
+        p.x * Math.cos(ay) +
+        z1 * Math.sin(ay);
+
+    const z2 =
+        -p.x * Math.sin(ay) +
+        z1 * Math.cos(ay);
+
+    // Perspectiva
+
+    const distancia = 650;
+
+    const perspectiva =
+        distancia / (distancia - z2);
+
+    return {
+
+        x: centroX + x2 * perspectiva,
+
+        y: centroY - y1 * perspectiva,
+
+        z: z2
+
+    };
+}
+
+// ======================================
+// MATERIAL DEL CUERPO
+// ======================================
+
+function crearMaterial() {
+
+    const gradiente = ctx.createLinearGradient(
+        200, 0, 600, 0
+    );
+
+    gradiente.addColorStop(0, "#451116");
+    gradiente.addColorStop(0.20, "#74151d");
+    gradiente.addColorStop(0.40, "#d83b3c");
+    gradiente.addColorStop(0.50, "#f05245");
+    gradiente.addColorStop(0.70, "#a91f27");
+    gradiente.addColorStop(1, "#451116");
+
+    return gradiente;
+}
+
+// ======================================
+// PUNTA LUMINOSA
+// ======================================
+
+function dibujarBrillo() {
+
+    const gradiente = ctx.createRadialGradient(
+        centroX, 105, 2,
+        centroX, 105, 45
+    );
+
+    gradiente.addColorStop(
+        0, "rgba(255,190,80,0.8)"
+    );
+
+    gradiente.addColorStop(
+        0.4, "rgba(255,90,30,0.35)"
+    );
+
+    gradiente.addColorStop(
+        1, "rgba(255,50,20,0)"
+    );
+
+    ctx.fillStyle = gradiente;
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        centroX, 105,
+        45, 25,
+        0, 0, Math.PI * 2
+    );
+
+    ctx.fill();
+}
+
+// ======================================
+// DIBUJAR
+// ======================================
+
+function dibujar() {
+
+    ctx.clearRect(
+        0, 0,
+        canvas.width,
+        canvas.height
+    );
+
+    const L = Number(largo.value);
+    const R = Number(radio.value);
+
+    document.getElementById("valorL").textContent = L;
+    document.getElementById("valorR").textContent = R;
+
+    const vertices = crearBengala(L, R);
+
+    const material = crearMaterial();
+
+    // ----------------------------------
+    // SOMBRA
+    // ----------------------------------
+
+    ctx.fillStyle = "rgba(0,0,0,0.20)";
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        centroX + 15,
+        centroY + L * 0.42,
+        R * 2.5,
+        R * 0.55,
+        0, 0, Math.PI * 2
+    );
+
+    ctx.fill();
+
+    // ----------------------------------
+    // ANILLOS HORIZONTALES
+    // ----------------------------------
+
+    ctx.lineWidth = 1;
+
+    for (let i = 0; i <= anillos; i++) {
+
+        ctx.beginPath();
+
+        for (let j = 0; j <= segmentos; j++) {
+
+            const indice =
+                i * segmentos + (j % segmentos);
+
+            const p = proyectar(vertices[indice]);
+
+            if (j === 0) {
+
+                ctx.moveTo(p.x, p.y);
+
+            } else {
+
+                ctx.lineTo(p.x, p.y);
+
+            }
+        }
+
+        const v = i / anillos;
+
+        if (v > 0.88) {
+
+            ctx.strokeStyle = "#ff9c45";
+
+        } else if (v < 0.10) {
+
+            ctx.strokeStyle = "#d0a0a0";
+
+        } else {
+
+            ctx.strokeStyle = material;
+
+        }
+
+        ctx.stroke();
+    }
+
+    // ----------------------------------
+    // LÍNEAS LONGITUDINALES
+    // ----------------------------------
+
+    for (let j = 0; j < segmentos; j++) {
+
+        ctx.beginPath();
+
+        for (let i = 0; i <= anillos; i++) {
+
+            const indice = i * segmentos + j;
+
+            const p = proyectar(vertices[indice]);
+
+            if (i === 0) {
+
+                ctx.moveTo(p.x, p.y);
+
+            } else {
+
+                ctx.lineTo(p.x, p.y);
+
+            }
+        }
+
+        // Reflejo lateral
+
+        if (j < segmentos / 5) {
+
+            ctx.strokeStyle = "#ffb0a0";
+
+        } else if (j < segmentos / 2) {
+
+            ctx.strokeStyle = "#ff7744";
+
+        } else {
+
+            ctx.strokeStyle = "#702027";
+
+        }
+
+        ctx.lineWidth = 1.2;
+
+        ctx.stroke();
+    }
+
+    // ----------------------------------
+    // BORDES METÁLICOS
+    // ----------------------------------
+
+    ctx.strokeStyle = "#b5b9bd";
+    ctx.lineWidth = 2;
+
+    for (const v of [0.06, 0.84]) {
+
+        const indice = Math.round(v * anillos);
+
+        ctx.beginPath();
+
+        for (let j = 0; j <= segmentos; j++) {
+
+            const id =
+                indice * segmentos + (j % segmentos);
+
+            const p = proyectar(vertices[id]);
+
+            if (j === 0) {
+
+                ctx.moveTo(p.x, p.y);
+
+            } else {
+
+                ctx.lineTo(p.x, p.y);
+
+            }
+        }
+
+        ctx.stroke();
+    }
+
+    // ----------------------------------
+    // RESPLANDOR
+    // ----------------------------------
+
+    dibujarBrillo();
+
+}
+
+// ======================================
+// CONTROLES
+// ======================================
+
+largo.addEventListener("input", dibujar);
+
+radio.addEventListener("input", dibujar);
+
+// ======================================
+// INICIO
+// ======================================
+
+dibujar();
+
+</script>
+
+</body>
+</html>
