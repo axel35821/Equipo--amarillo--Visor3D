@@ -1,0 +1,230 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bengala paramétrica 3D</title>
+
+<style>
+    body {
+        background: #20232b;
+        color: white;
+        font-family: Arial, sans-serif;
+        text-align: center;
+    }
+
+    canvas {
+        background: #303642;
+        border: 1px solid #777;
+        max-width: 100%;
+    }
+
+    .controles {
+        margin: 15px auto;
+        width: 320px;
+        max-width: 90%;
+        text-align: left;
+    }
+
+    .control {
+        margin: 15px 0;
+    }
+
+    input {
+        width: 100%;
+    }
+
+    span {
+        color: #ff7777;
+    }
+</style>
+</head>
+
+<body>
+
+<h2>Bengala paramétrica 3D</h2>
+
+<canvas id="visor" width="800" height="480"></canvas>
+
+<div class="controles">
+
+    <div class="control">
+        <label>Longitud: <span id="valorL">160</span></label>
+        <input type="range" id="largo"
+        min="100" max="220" value="160">
+    </div>
+
+    <div class="control">
+        <label>Radio: <span id="valorR">20</span></label>
+        <input type="range" id="radio"
+        min="12" max="35" value="20">
+    </div>
+
+</div>
+
+<script>
+
+const canvas = document.getElementById("visor");
+const ctx = canvas.getContext("2d");
+
+// Parámetros
+const largo = document.getElementById("largo");
+const radio = document.getElementById("radio");
+
+// Resolución de la figura
+const segmentos = 32;
+const anillos = 24;
+
+// Perfil de la bengala
+function perfil(t) {
+
+    const puntos = [
+        [0.00, 0.72],
+        [0.05, 0.85],
+        [0.10, 1.00],
+        [0.84, 1.00],
+        [0.92, 0.90],
+        [0.97, 0.58],
+        [1.00, 0.58]
+    ];
+
+    for (let i = 0; i < puntos.length - 1; i++) {
+
+        const [t1, r1] = puntos[i];
+        const [t2, r2] = puntos[i + 1];
+
+        if (t >= t1 && t <= t2) {
+
+            const f = (t - t1) / (t2 - t1);
+
+            return r1 + (r2 - r1) * f;
+        }
+    }
+
+    return puntos[puntos.length - 1][1];
+}
+
+// Generar superficie paramétrica
+function crearBengala(L, R) {
+
+    const vertices = [];
+
+    for (let i = 0; i <= anillos; i++) {
+
+        const v = i / anillos;
+
+        for (let j = 0; j < segmentos; j++) {
+
+            const u = (j / segmentos) * Math.PI * 2;
+
+            const r = R * perfil(v);
+
+            const x = r * Math.cos(u);
+            const y = L * (v - 0.5);
+            const z = r * Math.sin(u);
+
+            vertices.push({x, y, z});
+        }
+    }
+
+    return vertices;
+}
+
+// Proyección en perspectiva
+function proyectar(p) {
+
+    // Rotación para visualizar la figura
+    const ax = -0.25;
+    const ay = 0.55;
+
+    const y1 = p.y * Math.cos(ax) - p.z * Math.sin(ax);
+    const z1 = p.y * Math.sin(ax) + p.z * Math.cos(ax);
+
+    const x2 = p.x * Math.cos(ay) + z1 * Math.sin(ay);
+    const z2 = -p.x * Math.sin(ay) + z1 * Math.cos(ay);
+
+    const distancia = 650;
+    const perspectiva = 650 / (distancia - z2);
+
+    return {
+        x: 400 + x2 * perspectiva,
+        y: 240 - y1 * perspectiva
+    };
+}
+
+// Dibujar la geometría
+function dibujar() {
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const L = Number(largo.value);
+    const R = Number(radio.value);
+
+    document.getElementById("valorL").textContent = L;
+    document.getElementById("valorR").textContent = R;
+
+    const vertices = crearBengala(L, R);
+
+    ctx.lineWidth = 1.2;
+    ctx.strokeStyle = "#ff5555";
+
+    // Dibujar anillos horizontales
+    for (let i = 0; i <= anillos; i++) {
+
+        ctx.beginPath();
+
+        for (let j = 0; j <= segmentos; j++) {
+
+            const indice =
+                i * segmentos + (j % segmentos);
+
+            const p = proyectar(vertices[indice]);
+
+            if (j === 0) {
+                ctx.moveTo(p.x, p.y);
+            } else {
+                ctx.lineTo(p.x, p.y);
+            }
+        }
+
+        ctx.stroke();
+    }
+
+    // Dibujar líneas longitudinales
+    for (let j = 0; j < segmentos; j++) {
+
+        ctx.beginPath();
+
+        for (let i = 0; i <= anillos; i++) {
+
+            const indice = i * segmentos + j;
+
+            const p = proyectar(vertices[indice]);
+
+            if (i === 0) {
+                ctx.moveTo(p.x, p.y);
+            } else {
+                ctx.lineTo(p.x, p.y);
+            }
+        }
+
+        // Punta luminosa
+        ctx.strokeStyle =
+            j < segmentos / 2 ? "#ff9944" : "#ff5555";
+
+        ctx.stroke();
+    }
+}
+
+// Actualizar cuando se mueven los sliders
+largo.addEventListener("input", dibujar);
+radio.addEventListener("input", dibujar);
+
+// Primera generación
+dibujar();
+
+</script>
+
+</body>
+</html>
