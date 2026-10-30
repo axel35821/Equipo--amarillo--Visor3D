@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emily animada</title>
+<style>
+  body { margin: 0; min-height: 100vh; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: Arial, sans-serif; }
+  svg { height: 80vh; width: auto; overflow: visible; }
+  .controles { display: flex; gap: 10px; margin: 12px 0; }
+  button { padding: 10px 18px; border: 0; border-radius: 8px; background: #0B0F19; color: #fff; font-weight: bold; cursor: pointer; }
+  button:hover { background: #0075E1; }
+
+  /* Colores originales */
+  .fil2  { fill: #0B0F19; }
+  .fil3  { fill: #4A2D1D; }
+  .fil4  { fill: #FFC294; }
+  .fil5  { fill: #331A00; }
+  .fil6  { fill: #FFD738; }
+  .fil7  { fill: #0075E1; }
+  .fil8  { fill: #2C160B; }
+  .fil9  { fill: #102542; }
+  .fil10 { fill: #A3B1C6; }
+  .fil0  { fill: none; }
+  .str1  { stroke: #4A2D1D; stroke-width: 79.38; stroke-miterlimit: 22.9256; }
+  .str5  { stroke: #F58634; stroke-width: 135.46; stroke-miterlimit: 22.9256; }
+  .str6  { stroke: #00A859; stroke-width: 67.73; stroke-miterlimit: 22.9256; }
+
+  /* Todas las partes que se mueven */
+  .parte { transform-box: fill-box; transform-origin: center; }
+  .cuerpo, .mano-i, .mano-d, .zapato-i, .zapato-d { transform-box: fill-box; }
+  .ojo { transform-box: fill-box; transform-origin: center; animation: parpadeo 4s infinite; }
+
+  @keyframes parpadeo { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(0.1); } }
+
+  /* ---------- REPOSO ---------- */
+  [data-modo="reposo"] .cuerpo   { animation: respirar 2.4s ease-in-out infinite; }
+  [data-modo="reposo"] .mano-i   { animation: balanceo 2.4s ease-in-out infinite; }
+  [data-modo="reposo"] .mano-d   { animation: balanceo 2.4s ease-in-out infinite reverse; }
+  @keyframes respirar { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-70px); } }
+  @keyframes balanceo { 0%,100% { transform: translateY(0); } 50% { transform: translateY(60px); } }
+
+  /* ---------- CAMINAR ---------- */
+  [data-modo="caminar"] .cuerpo   { animation: paso 0.6s ease-in-out infinite; }
+  [data-modo="caminar"] .mano-i   { animation: brazo 0.6s ease-in-out infinite; }
+  [data-modo="caminar"] .mano-d   { animation: brazo 0.6s ease-in-out infinite reverse; }
+  [data-modo="caminar"] .zapato-i { animation: pie 0.6s ease-in-out infinite; }
+  [data-modo="caminar"] .zapato-d { animation: pie 0.6s ease-in-out infinite reverse; }
+  @keyframes paso  { 0%,100% { transform: translate(-40px, 0); } 25%,75% { transform: translate(0, -90px); } 50% { transform: translate(40px, 0); } }
+  @keyframes brazo { 0%,100% { transform: translateY(-120px); } 50% { transform: translateY(120px); } }
+  @keyframes pie   { 0%,100% { transform: translate(0, 0); } 50% { transform: translate(0, -260px); } }
+
+  /* ---------- SALTAR ---------- */
+  [data-modo="saltar"] .cuerpo   { animation: salto 0.9s ease-in-out infinite; }
+  [data-modo="saltar"] .mano-i   { animation: manos-arriba 0.9s ease-in-out infinite; }
+  [data-modo="saltar"] .mano-d   { animation: manos-arriba 0.9s ease-in-out infinite; }
+  [data-modo="saltar"] .zapato-i,
+  [data-modo="saltar"] .zapato-d { animation: pies-arriba 0.9s ease-in-out infinite; }
+  @keyframes salto { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-900px); } }
+  @keyframes manos-arriba { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-400px); } }
+  @keyframes pies-arriba { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-200px); } }
+</style>
+</head>
+<body>
+
+<div class="controles">
+  <button onclick="modo('reposo')">Reposo</button>
+  <button onclick="modo('caminar')">Caminar</button>
+  <button onclick="modo('saltar')">Saltar</button>
+</div>
+
+<svg id="emily" data-modo="reposo" xmlns="http://www.w3.org/2000/svg" viewBox="-500 5800 5600 14500" style="shape-rendering:geometricPrecision">
+
+  <!-- Sombra en el suelo -->
+  <ellipse cx="2300" cy="20250" rx="2200" ry="150" fill="#000" opacity="0.12"/>
+
+  <g class="cuerpo">
+
+    <!-- Contorno negro (cuerpo) -->
+    <rect class="fil2" x="1269.99" y="6032.5"   width="2116.67" height="1587.5"/>
+    <rect class="fil2" x="740.83"  y="6826.25"  width="3175"    height="3704.17"/>
+    <rect class="fil2" x="211.66"  y="10265.84" width="4233.33" height="4762.5"/>
+    <rect class="fil2" x="476.24"  y="14763.75" width="3704.17" height="4762.5"/>
+
+    <!-- Pelo -->
+    <rect class="fil3" x="1481.66" y="6244.17" width="1693.33" height="1270"/>
+    <rect class="fil3" x="952.49"  y="7037.91" width="2751.67" height="3016.25"/>
+    <rect class="fil8" x="3069.16" y="7831.67" width="529.17"  height="1587.5"/>
+
+    <!-- Cara -->
+    <rect class="fil4" x="1746.25" y="8096.25" width="1693.33" height="1693.33"/>
+    <rect class="fil5 ojo" x="2804.58" y="8625.42" width="317.5" height="635"/>
+    <rect class="fil5 ojo" x="2146.69" y="8643.11" width="317.5" height="635"/>
+    <rect class="fil4" x="1534.58" y="8890"    width="317.5"   height="317.5"/>
+    <polygon class="fil6" points="1270,9419.17 1746.25,9419.17 1508.12,9948.33"/>
+
+    <!-- Camiseta -->
+    <polygon class="fil7" points="476.25,10530.42 4180.42,10530.42 4656.67,13440.83 3915.83,13440.83 3386.67,11853.33 1270,11853.33 740.83,13440.83 0,13440.83"/>
+    <polygon class="fil4" points="1931.46,10530.42 2328.33,11191.88 2725.21,10530.42"/>
+
+    <!-- Manos -->
+    <rect class="fil4 mano-i" x="-264.59" y="13440.84" width="793.75" height="926.04"/>
+    <rect class="fil4 mano-d" x="4127.49" y="13440.84" width="793.75" height="926.04"/>
+
+    <!-- Pantalón -->
+    <polygon class="fil9" points="740.83,13440.83 3915.83,13440.83 4180.42,17674.17 2857.5,18732.5 2328.33,15557.5 1799.17,15557.5 1270,18732.5 -52.92,17674.17"/>
+
+    <!-- Boca -->
+    <line class="fil0 str1" x1="2453.84" y1="9510.97" x2="2850.71" y2="9510.97"/>
+
+    <!-- Letras del pecho -->
+    <path class="fil0 str5" d="M2581.22 11332.51l576.54 -3.75m-296.81 361.27l-2.37 -359.22"/>
+    <path class="fil0 str5" d="M3257.82 11306.28l1.86 341.49 191.15 0m-191.15 -341.49l200.43 0m-200.43 170.75l194.86 0"/>
+    <path class="fil0 str5" d="M3831.55 11298.5c0,0 -274.84,-6.28 -261.85,201.58m266.07 123.84c0,0 -278.89,81.02 -265.9,-126.83"/>
+    <path class="fil0 str6" d="M2600.94 11337.93l539.15 -3.51m-277.56 337.84l-2.22 -335.92"/>
+    <path class="fil0 str6" d="M3257.91 11324.33l1.7 312.06 174.68 0m-174.68 -312.06l183.16 0m-183.16 156.03l178.07 0"/>
+    <path class="fil0 str6" d="M3821.78 11319c0,0 -251.14,-5.74 -239.27,184.2m243.13 113.17c0,0 -254.85,74.04 -242.98,-115.9"/>
+
+    <!-- Zapato izquierdo (contorno + zapato) -->
+    <g class="zapato-i">
+      <rect class="fil2" x="79.37" y="18997.08" width="1984.38" height="1058.33"/>
+      <polygon class="fil10" points="-52.92,18732.5 1270,18732.5 1402.29,19790.83 -317.5,19790.83"/>
+    </g>
+
+    <!-- Zapato derecho (contorno + zapato) -->
+    <g class="zapato-d">
+      <rect class="fil2" x="2725.21" y="18997.08" width="1984.38" height="1058.33"/>
+      <polygon class="fil10" points="2857.5,18732.5 4180.42,18732.5 4445,19790.83 2725.21,19790.83"/>
+    </g>
+
+  </g>
+</svg>
+
+<script>
+  function modo(nombre) {
+    document.getElementById('emily').setAttribute('data-modo', nombre);
+  }
+</script>
+
+</body>
+</html>
