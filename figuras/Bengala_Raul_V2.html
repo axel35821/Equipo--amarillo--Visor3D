@@ -14,7 +14,7 @@
 }
 
 body {
-    background: #20232b;
+    background: #080B45;
     color: white;
     font-family: Arial, sans-serif;
     text-align: center;
@@ -27,8 +27,8 @@ h2 {
 }
 
 canvas {
-    background: #303642;
-    border: 1px solid #777;
+    background: #10164F;
+    border: 1px solid #414B91;
     max-width: 100%;
     border-radius: 8px;
 }
@@ -38,7 +38,7 @@ canvas {
     width: 320px;
     max-width: 95%;
     text-align: left;
-    background: #292e39;
+    background: #111747;
     padding: 15px;
     border-radius: 10px;
 }
@@ -50,6 +50,7 @@ canvas {
 input {
     width: 100%;
     cursor: pointer;
+    accent-color: #ff3030;
 }
 
 span {
@@ -101,12 +102,8 @@ const ctx = canvas.getContext("2d");
 const largo = document.getElementById("largo");
 const radio = document.getElementById("radio");
 
-// Geometría optimizada
-
 const segmentos = 24;
 const anillos = 20;
-
-// Centro de la figura
 
 const centroX = 400;
 const centroY = 240;
@@ -139,8 +136,6 @@ function perfil(t) {
         if (t >= t1 && t <= t2) {
 
             let f = (t - t1) / (t2 - t1);
-
-            // Interpolación cúbica
 
             f = f * f * (3 - 2 * f);
 
@@ -202,8 +197,6 @@ function proyectar(p) {
     const ax = -0.25;
     const ay = 0.55;
 
-    // Rotación X
-
     const y1 =
         p.y * Math.cos(ax) -
         p.z * Math.sin(ax);
@@ -212,8 +205,6 @@ function proyectar(p) {
         p.y * Math.sin(ax) +
         p.z * Math.cos(ax);
 
-    // Rotación Y
-
     const x2 =
         p.x * Math.cos(ay) +
         z1 * Math.sin(ay);
@@ -221,8 +212,6 @@ function proyectar(p) {
     const z2 =
         -p.x * Math.sin(ay) +
         z1 * Math.cos(ay);
-
-    // Perspectiva
 
     const distancia = 650;
 
@@ -241,7 +230,7 @@ function proyectar(p) {
 }
 
 // ======================================
-// MATERIAL DEL CUERPO
+// MATERIAL ROJO
 // ======================================
 
 function crearMaterial() {
@@ -250,12 +239,12 @@ function crearMaterial() {
         200, 0, 600, 0
     );
 
-    gradiente.addColorStop(0, "#451116");
-    gradiente.addColorStop(0.20, "#74151d");
-    gradiente.addColorStop(0.40, "#d83b3c");
-    gradiente.addColorStop(0.50, "#f05245");
-    gradiente.addColorStop(0.70, "#a91f27");
-    gradiente.addColorStop(1, "#451116");
+    gradiente.addColorStop(0, "#450008");
+    gradiente.addColorStop(0.20, "#85000D");
+    gradiente.addColorStop(0.40, "#D41422");
+    gradiente.addColorStop(0.50, "#FF4545");
+    gradiente.addColorStop(0.70, "#BD101C");
+    gradiente.addColorStop(1, "#420008");
 
     return gradiente;
 }
@@ -272,15 +261,15 @@ function dibujarBrillo() {
     );
 
     gradiente.addColorStop(
-        0, "rgba(255,190,80,0.8)"
+        0, "rgba(255,110,80,0.8)"
     );
 
     gradiente.addColorStop(
-        0.4, "rgba(255,90,30,0.35)"
+        0.4, "rgba(255,30,30,0.35)"
     );
 
     gradiente.addColorStop(
-        1, "rgba(255,50,20,0)"
+        1, "rgba(255,0,0,0)"
     );
 
     ctx.fillStyle = gradiente;
@@ -318,11 +307,9 @@ function dibujar() {
 
     const material = crearMaterial();
 
-    // ----------------------------------
     // SOMBRA
-    // ----------------------------------
 
-    ctx.fillStyle = "rgba(0,0,0,0.20)";
+    ctx.fillStyle = "rgba(0,0,0,0.35)";
 
     ctx.beginPath();
 
@@ -336,9 +323,7 @@ function dibujar() {
 
     ctx.fill();
 
-    // ----------------------------------
     // ANILLOS HORIZONTALES
-    // ----------------------------------
 
     ctx.lineWidth = 1;
 
@@ -368,11 +353,11 @@ function dibujar() {
 
         if (v > 0.88) {
 
-            ctx.strokeStyle = "#ff9c45";
+            ctx.strokeStyle = "#FF5555";
 
         } else if (v < 0.10) {
 
-            ctx.strokeStyle = "#d0a0a0";
+            ctx.strokeStyle = "#D65C65";
 
         } else {
 
@@ -383,9 +368,7 @@ function dibujar() {
         ctx.stroke();
     }
 
-    // ----------------------------------
     // LÍNEAS LONGITUDINALES
-    // ----------------------------------
 
     for (let j = 0; j < segmentos; j++) {
 
@@ -408,19 +391,17 @@ function dibujar() {
             }
         }
 
-        // Reflejo lateral
-
         if (j < segmentos / 5) {
 
-            ctx.strokeStyle = "#ffb0a0";
+            ctx.strokeStyle = "#FFAAAA";
 
         } else if (j < segmentos / 2) {
 
-            ctx.strokeStyle = "#ff7744";
+            ctx.strokeStyle = "#FF5555";
 
         } else {
 
-            ctx.strokeStyle = "#702027";
+            ctx.strokeStyle = "#65000C";
 
         }
 
@@ -429,11 +410,9 @@ function dibujar() {
         ctx.stroke();
     }
 
-    // ----------------------------------
     // BORDES METÁLICOS
-    // ----------------------------------
 
-    ctx.strokeStyle = "#b5b9bd";
+    ctx.strokeStyle = "#AEB5C5";
     ctx.lineWidth = 2;
 
     for (const v of [0.06, 0.84]) {
@@ -463,9 +442,7 @@ function dibujar() {
         ctx.stroke();
     }
 
-    // ----------------------------------
     // RESPLANDOR
-    // ----------------------------------
 
     dibujarBrillo();
 
@@ -476,7 +453,6 @@ function dibujar() {
 // ======================================
 
 largo.addEventListener("input", dibujar);
-
 radio.addEventListener("input", dibujar);
 
 // ======================================
