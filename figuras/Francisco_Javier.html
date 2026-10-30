@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Funciones 3D - Francisco Javier</title>
+
+    <style>
+        body {
+            margin: 0;
+            background-color: #1a1a1a;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 1.7rem;
+        }
+
+        canvas {
+            background-color: #111;
+            border: 2px solid #444;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            max-width: 100%;
+        }
+
+        .controles {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #292929;
+            border-radius: 10px;
+            width: 350px;
+            max-width: 90%;
+        }
+
+        .control {
+            margin: 15px 0;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        input[type="range"], select {
+            width: 100%;
+            cursor: pointer;
+        }
+
+        select {
+            padding: 8px;
+            background-color: #111;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 9px 15px;
+            background-color: #00bfa5;
+            color: black;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #00e5c3;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Mis funciones del Visor 3D</h1>
+    <h2>Traslación, escala y selector de figuras</h2>
+
+    <canvas id="visorCanvas" width="800" height="600"></canvas>
+
+    <div class="controles">
+
+        <h3>1. Selector de figuras</h3>
+
+        <div class="control">
+            <label for="selectorFigura">Seleccionar figura:</label>
+
+            <select id="selectorFigura">
+                <option value="cubo">Cubo</option>
+                <option value="piramide">Pirámide</option>
+                <option value="prisma">Prisma triangular</option>
+            </select>
+        </div>
+
+        <hr>
+
+        <h3>2. Controles de traslación</h3>
+
+        <div class="control">
+            <label for="ejeX">
+                Eje X: <span id="valorX">0</span>
+            </label>
+            <input type="range" id="ejeX"
+                   min="-100" max="100" value="0">
+        </div>
+
+        <div class="control">
+            <label for="ejeY">
+                Eje Y: <span id="valorY">0</span>
+            </label>
+            <input type="range" id="ejeY"
+                   min="-100" max="100" value="0">
+        </div>
+
+        <div class="control">
+            <label for="ejeZ">
+                Eje Z: <span id="valorZ">0</span>
+            </label>
+            <input type="range" id="ejeZ"
+                   min="-100" max="100" value="0">
+        </div>
+
+        <hr>
+
+        <h3>3. Controles de escala</h3>
+
+        <div class="control">
+            <label for="escala">
+                Tamaño: <span id="valorEscala">1.0</span>
+            </label>
+
+            <input type="range" id="escala"
+                   min="0.5" max="2.5" step="0.1" value="1">
+        </div>
+
+        <button id="reiniciar">Restablecer valores</button>
+
+    </div>
+
+    <script>
+
+        // =====================================
+        // 1. CONFIGURACIÓN DEL CANVAS
+        // =====================================
+
+        const canvas = document.getElementById("visorCanvas");
+        const ctx = canvas.getContext("2d");
+
+
+        // =====================================
+        // 2. VARIABLES DE TRASLACIÓN Y ESCALA
+        // =====================================
+
+        let trasladoX = 0;
+        let trasladoY = 0;
+        let trasladoZ = 0;
+
+        let factorEscala = 1;
+
+        let figuraActual = "cubo";
+
+
+        // =====================================
+        // 3. DEFINICIÓN DE FIGURAS 3D
+        // =====================================
+
+        const figuras = {
+
+            cubo: {
+                vertices: [
+                    {x:-50, y:-50, z:-50},
+                    {x: 50, y:-50, z:-50},
+                    {x: 50, y: 50, z:-50},
+                    {x:-50, y: 50, z:-50},
+                    {x:-50, y:-50, z: 50},
+                    {x: 50, y:-50, z: 50},
+                    {x: 50, y: 50, z: 50},
+                    {x:-50, y: 50, z: 50}
+                ],
+
+                aristas: [
+                    [0,1], [1,2], [2,3], [3,0],
+                    [4,5], [5,6], [6,7], [7,4],
+                    [0,4], [1,5], [2,6], [3,7]
+                ]
+            },
+
+
+            piramide: {
+                vertices: [
+                    {x:-60, y:40, z:-50},
+                    {x:60, y:40, z:-50},
+                    {x:60, y:40, z:50},
+                    {x:-60, y:40, z:50},
+                    {x:0, y:-70, z:0}
+                ],
+
+                aristas: [
+                    [0,1], [1,2], [2,3], [3,0],
+                    [0,4], [1,4], [2,4], [3,4]
+                ]
+            },
+
+
+            prisma: {
+                vertices: [
+                    {x:-60, y:-50, z:-50},
+                    {x:60, y:-50, z:-50},
+                    {x:0, y:60, z:-50},
+
+                    {x:-60, y:-50, z:50},
+                    {x:60, y:-50, z:50},
+                    {x:0, y:60, z:50}
+                ],
+
+                aristas: [
+                    [0,1], [1,2], [2,0],
+                    [3,4], [4,5], [5,3],
+                    [0,3], [1,4], [2,5]
+                ]
+            }
+
+        };
+
+
+        // =====================================
+        // 4. PROYECCIÓN EN PERSPECTIVA
+        // =====================================
+
+        function proyectar(punto) {
+
+            const x = (punto.x * factorEscala) + trasladoX;
+            const y = (punto.y * factorEscala) + trasladoY;
+
+            const z = (punto.z * factorEscala) + trasladoZ + 200;
+
+            const zSeguro = Math.max(50, z);
+
+            const factor = 300 / zSeguro;
+
+            return {
+                x: x * factor + canvas.width / 2,
+                y: y * factor + canvas.height / 2
+            };
+
+        }
+
+
+        // =====================================
+        // 5. DIBUJAR FIGURA SELECCIONADA
+        // =====================================
+
+        function dibujarFigura() {
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const figura = figuras[figuraActual];
+
+            const proyectados = figura.vertices.map(proyectar);
+
+            ctx.strokeStyle = "#00ffcc";
+            ctx.lineWidth = 2;
+
+            figura.aristas.forEach(arista => {
+
+                const p1 = proyectados[arista[0]];
+                const p2 = proyectados[arista[1]];
+
+                ctx.beginPath();
+                ctx.moveTo(p1.x, p1.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.stroke();
+
+            });
+
+        }
+
+
+        // =====================================
+        // 6. CONTROLES DE TRASLACIÓN
+        // =====================================
+
+        const controlX = document.getElementById("ejeX");
+        const controlY = document.getElementById("ejeY");
+        const controlZ = document.getElementById("ejeZ");
+
+        controlX.addEventListener("input", function() {
+
+            trasladoX = Number(controlX.value);
+
+            document.getElementById("valorX").textContent = trasladoX;
+
+            dibujarFigura();
+
+        });
+
+        controlY.addEventListener("input", function() {
+
+            trasladoY = Number(controlY.value);
+
+            document.getElementById("valorY").textContent = trasladoY;
+
+            dibujarFigura();
+
+        });
+
+        controlZ.addEventListener("input", function() {
+
+            trasladoZ = Number(controlZ.value);
+
+            document.getElementById("valorZ").textContent = trasladoZ;
+
+            dibujarFigura();
+
+        });
+
+
+        // =====================================
+        // 7. CONTROL DE ESCALA
+        // =====================================
+
+        const controlEscala = document.getElementById("escala");
+
+        controlEscala.addEventListener("input", function() {
+
+            factorEscala = Number(controlEscala.value);
+
+            document.getElementById("valorEscala").textContent =
+                factorEscala.toFixed(1);
+
+            dibujarFigura();
+
+        });
+
+
+        // =====================================
+        // 8. SELECTOR DE FIGURAS
+        // =====================================
+
+        const selectorFigura = document.getElementById("selectorFigura");
+
+        selectorFigura.addEventListener("change", function() {
+
+            figuraActual = selectorFigura.value;
+
+            dibujarFigura();
+
+        });
+
+
+        // =====================================
+        // 9. RESTABLECER VALORES
+        // =====================================
+
+        document.getElementById("reiniciar").addEventListener("click", function() {
+
+            trasladoX = 0;
+            trasladoY = 0;
+            trasladoZ = 0;
+
+            factorEscala = 1;
+
+            controlX.value = 0;
+            controlY.value = 0;
+            controlZ.value = 0;
+
+            controlEscala.value = 1;
+
+            document.getElementById("valorX").textContent = 0;
+            document.getElementById("valorY").textContent = 0;
+            document.getElementById("valorZ").textContent = 0;
+            document.getElementById("valorEscala").textContent = "1.0";
+
+            dibujarFigura();
+
+        });
+
+
+        // =====================================
+        // 10. INICIAR VISOR
+        // =====================================
+
+        dibujarFigura();
+
+    </script>
+
+</body>
+</html>
