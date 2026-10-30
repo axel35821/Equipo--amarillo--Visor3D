@@ -1,0 +1,270 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visor 3D - Rotación en tres ejes</title>
+
+    <style>
+        body {
+            margin: 0;
+            background-color: #1a1a1a;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        h1 {
+            margin-bottom: 10px;
+            font-size: 1.5rem;
+        }
+
+        canvas {
+            background-color: #111;
+            border: 2px solid #444;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            cursor: grab;
+            touch-action: none;
+        }
+
+        canvas:active {
+            cursor: grabbing;
+        }
+
+        .controles {
+            margin-top: 15px;
+            text-align: center;
+            line-height: 1.8;
+            color: #ccc;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Visor 3D - Rotación en X, Y, Z</h1>
+
+    <canvas id="visorCanvas" width="800" height="600"></canvas>
+
+    <div class="controles">
+        <p>
+            <b>Teclado:</b>
+            Flechas = Rotación X / Y |
+            Q / E = Rotación Z |
+            R = Reiniciar
+        </p>
+        <p>
+            <b>Ratón:</b> Mantén presionado y arrastra para rotar.
+        </p>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('visorCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const centroX = canvas.width / 2;
+        const centroY = canvas.height / 2;
+
+        // Vértices del cubo en coordenadas 3D
+        const verticesCubo = [
+            {x: -50, y: -50, z: -50},
+            {x:  50, y: -50, z: -50},
+            {x:  50, y:  50, z: -50},
+            {x: -50, y:  50, z: -50},
+            {x: -50, y: -50, z:  50},
+            {x:  50, y: -50, z:  50},
+            {x:  50, y:  50, z:  50},
+            {x: -50, y:  50, z:  50}
+        ];
+
+        // Aristas del cubo
+        const aristasCubo = [
+            [0,1], [1,2], [2,3], [3,0],
+            [4,5], [5,6], [6,7], [7,4],
+            [0,4], [1,5], [2,6], [3,7]
+        ];
+
+        // Ángulos de rotación
+        let rotacionX = 0;
+        let rotacionY = 0;
+        let rotacionZ = 0;
+
+        const velocidad = 0.05;
+
+        // Matriz de rotación en X
+        function rotarX(punto, angulo) {
+            const cos = Math.cos(angulo);
+            const sin = Math.sin(angulo);
+
+            return {
+                x: punto.x,
+                y: punto.y * cos - punto.z * sin,
+                z: punto.y * sin + punto.z * cos
+            };
+        }
+
+        // Matriz de rotación en Y
+        function rotarY(punto, angulo) {
+            const cos = Math.cos(angulo);
+            const sin = Math.sin(angulo);
+
+            return {
+                x: punto.x * cos + punto.z * sin,
+                y: punto.y,
+                z: -punto.x * sin + punto.z * cos
+            };
+        }
+
+        // Matriz de rotación en Z
+        function rotarZ(punto, angulo) {
+            const cos = Math.cos(angulo);
+            const sin = Math.sin(angulo);
+
+            return {
+                x: punto.x * cos - punto.y * sin,
+                y: punto.x * sin + punto.y * cos,
+                z: punto.z
+            };
+        }
+
+        // Aplicar las tres rotaciones al mismo punto
+        function aplicarRotaciones(punto) {
+            let resultado = rotarX(punto, rotacionX);
+            resultado = rotarY(resultado, rotacionY);
+            resultado = rotarZ(resultado, rotacionZ);
+
+            return resultado;
+        }
+
+        // Proyección en perspectiva
+        function proyectar(punto3D) {
+            const distanciaFocal = 300;
+            const zDesplazado = punto3D.z + 200;
+
+            const factor = distanciaFocal / zDesplazado;
+
+            return {
+                x: punto3D.x * factor + centroX,
+                y: punto3D.y * factor + centroY
+            };
+        }
+
+        // Control del teclado
+        document.addEventListener('keydown', function(evento) {
+
+            const tecla = evento.key.toLowerCase();
+
+            switch (tecla) {
+                case 'arrowup':
+                    rotacionX -= velocidad;
+                    evento.preventDefault();
+                    break;
+
+                case 'arrowdown':
+                    rotacionX += velocidad;
+                    evento.preventDefault();
+                    break;
+
+                case 'arrowleft':
+                    rotacionY -= velocidad;
+                    evento.preventDefault();
+                    break;
+
+                case 'arrowright':
+                    rotacionY += velocidad;
+                    evento.preventDefault();
+                    break;
+
+                case 'q':
+                    rotacionZ -= velocidad;
+                    break;
+
+                case 'e':
+                    rotacionZ += velocidad;
+                    break;
+
+                case 'r':
+                    rotacionX = 0;
+                    rotacionY = 0;
+                    rotacionZ = 0;
+                    break;
+            }
+        });
+
+        // Variables para controlar el ratón
+        let arrastrando = false;
+        let ultimaX = 0;
+        let ultimaY = 0;
+
+        canvas.addEventListener('pointerdown', function(evento) {
+            arrastrando = true;
+            ultimaX = evento.clientX;
+            ultimaY = evento.clientY;
+            canvas.setPointerCapture(evento.pointerId);
+        });
+
+        canvas.addEventListener('pointermove', function(evento) {
+            if (!arrastrando) return;
+
+            const movimientoX = evento.clientX - ultimaX;
+            const movimientoY = evento.clientY - ultimaY;
+
+            // Movimiento horizontal: rotación Y
+            rotacionY += movimientoX * 0.01;
+
+            // Movimiento vertical: rotación X
+            rotacionX += movimientoY * 0.01;
+
+            ultimaX = evento.clientX;
+            ultimaY = evento.clientY;
+        });
+
+        canvas.addEventListener('pointerup', function() {
+            arrastrando = false;
+        });
+
+        canvas.addEventListener('pointercancel', function() {
+            arrastrando = false;
+        });
+
+        // Bucle de animación y renderizado
+        function animar() {
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Transformar y proyectar vértices
+            const verticesProyectados = verticesCubo.map(function(v) {
+                const rotado = aplicarRotaciones(v);
+                return proyectar(rotado);
+            });
+
+            // Dibujar aristas
+            ctx.strokeStyle = '#00ffcc';
+            ctx.lineWidth = 2;
+
+            aristasCubo.forEach(function(arista) {
+
+                const p1 = verticesProyectados[arista[0]];
+                const p2 = verticesProyectados[arista[1]];
+
+                ctx.beginPath();
+                ctx.moveTo(p1.x, p1.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.stroke();
+            });
+
+            requestAnimationFrame(animar);
+        }
+
+        // Iniciar el visor
+        requestAnimationFrame(animar);
+
+    </script>
+
+</body>
+</html>
